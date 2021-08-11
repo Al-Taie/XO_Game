@@ -1,18 +1,19 @@
 package com.example.xogame
 
+
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
-import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import com.example.xogame.databinding.ActivityMainBinding
-import com.example.xogame.util.Constant
-import com.example.xogame.util.Player
+import com.example.xogame.util.*
+
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    companion object var player = Player.ONE
+    private val buttons = mutableListOf<Button>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,115 +23,79 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setValue(button: View) {
-        if ((button as Button).text.isNotEmpty()) {
-            Toast.makeText(
-                this,
-                "Not Allowed",
-                Toast.LENGTH_SHORT
-            ).show()
-            return
-        }
+        Data.ROUND++
+        (button as Button).isEnabled = false
+        button.text = if (Player.CURRENT == Player.TWO) Constant.X else Constant.O
 
-        button.text = if (player == Player.TWO) Constant.X else Constant.O
-
-        if (player == Player.TWO) {
-            player = Player.ONE
-            button.isEnabled = false
+        if (Player.CURRENT == Player.TWO) {
+            Player.CURRENT = Player.ONE
             button.setBackgroundColor(Color.GRAY)
         } else {
-            player = Player.TWO
-            button.isEnabled = false
+            Player.CURRENT = Player.TWO
             button.setBackgroundColor(Color.RED)
         }
 
-        if (isWinner(Constant.X)) {
-            Toast.makeText(this, "X Winner!", Toast.LENGTH_LONG).show()
-            reset()
-        } else if (isWinner(Constant.O)) {
-            Toast.makeText(this, "O Winner!", Toast.LENGTH_LONG).show()
-            reset()
+        if (isWinner(current = Constant.X)) {
+            Points.X++
+            binding.playerX.text = Points.X.toString()
+            reset(winner = Constant.X)
+        } else if (isWinner(current = Constant.O)) {
+            Points.O++
+            binding.playerO.text = Points.O.toString()
+            reset(winner = Constant.O)
+        }
+
+        if (Data.ROUND >= 9) {
+            Points.reset()
+            reset(null)
         }
     }
 
     private fun isWinner(current: String): Boolean {
-        val state1 = if (current != binding.btn1.text) false
-                     else (binding.btn2.text == current && binding.btn3.text == current)
-                             || (binding.btn4.text == current && binding.btn7.text == current)
-                             || (binding.btn5.text == current && binding.btn9.text == current)
-
-        val state2 = if (current != binding.btn2.text) false
-                     else (binding.btn5.text == current && binding.btn8.text == current)
-
-        val state3 = if (current != binding.btn2.text) false
-                     else (binding.btn5.text == current && binding.btn7.text == current)
-                             || (binding.btn6.text== current && binding.btn9.text == current)
-
-        val state4 = when (current) {
-            binding.btn4.text -> (binding.btn5.text == current && binding.btn6.text == current)
-            binding.btn7.text -> (binding.btn8.text == current && binding.btn9.text == current)
+        val state1 = when (buttons[Index.ZERO].text.equals(current)) {
+            true -> (current == buttons[Index.ONE].text && buttons[Index.TWO].text == current)
+                    || (current == buttons[Index.THREE].text && buttons[Index.SIX].text == current)
+                    || (current == buttons[Index.FOUR].text && buttons[Index.EIGHT].text == current)
             else -> false
         }
 
-        return (state1 || state2 || state3 || state4)
+        val state2 = when (buttons[Index.FOUR].text.equals(current)) {
+            true -> (current == buttons[Index.SIX].text && buttons[Index.TWO].text == current)
+                    || (current == buttons[Index.THREE].text && buttons[Index.FIVE].text == current)
+                    || (current == buttons[Index.ONE].text && buttons[Index.SEVEN].text == current)
+            else -> false
+        }
 
+        val state3 = when (buttons[Index.EIGHT].text.equals(current)) {
+            true -> (current == buttons[Index.TWO].text && buttons[Index.FIVE].text == current)
+                    || (current == buttons[Index.SIX].text && buttons[Index.SEVEN].text == current)
+            else -> false
+        }
+        return (state1 || state2 || state3)
     }
 
-    private fun reset() {
-        binding.btn1.apply {
-            this.text = ""
-            this.isEnabled = true
-            this.setBackgroundColor(Color.GREEN) }
-
-        binding.btn2.apply {
-            this.text = ""
-            this.isEnabled = true
-            this.setBackgroundColor(Color.GREEN) }
-
-        binding.btn3.apply {
-            this.text = ""
-            this.isEnabled = true
-            this.setBackgroundColor(Color.GREEN) }
-
-        binding.btn4.apply {
-            this.text = ""
-            this.isEnabled = true
-            this.setBackgroundColor(Color.GREEN) }
-
-        binding.btn5.apply {
-            this.text = ""
-            this.isEnabled = true
-            this.setBackgroundColor(Color.GREEN) }
-
-        binding.btn6.apply {
-            this.text = ""
-            this.isEnabled = true
-            this.setBackgroundColor(Color.GREEN) }
-
-        binding.btn7.apply {
-            this.text = ""
-            this.isEnabled = true
-            this.setBackgroundColor(Color.GREEN) }
-
-        binding.btn8.apply {
-            this.text = ""
-            this.isEnabled = true
-            this.setBackgroundColor(Color.GREEN) }
-
-        binding.btn9.apply {
-            this.text = ""
-            this.isEnabled = true
-            this.setBackgroundColor(Color.GREEN) }
+    private fun reset(winner: String?) {
+        winner?.let { Toast.makeText(this, "$it Winner!", Toast.LENGTH_LONG).show() }
+        Data.reset()
+        buttons.forEach {
+            it.text = ""
+            it.isEnabled = true
+            it.setBackgroundColor(Color.TRANSPARENT)
+        }
     }
 
     private fun init() {
-        binding.btn1.setOnClickListener { setValue(it) }
-        binding.btn2.setOnClickListener { setValue(it) }
-        binding.btn3.setOnClickListener { setValue(it) }
-        binding.btn4.setOnClickListener { setValue(it) }
-        binding.btn5.setOnClickListener { setValue(it) }
-        binding.btn6.setOnClickListener { setValue(it) }
-        binding.btn7.setOnClickListener { setValue(it) }
-        binding.btn8.setOnClickListener { setValue(it) }
-        binding.btn9.setOnClickListener { setValue(it) }
+        for (i in 0 until Constant.CELL_COUNT) {
+            val button = binding.gridLayout.getChildAt(i) as Button
+            buttons.add(button)
+            button.setOnClickListener { setValue(it) }
+        }
+
+        binding.btnReset.setOnClickListener {
+            reset(null)
+            Points.reset()
+            binding.playerX.text = Points.X.toString()
+            binding.playerO.text = Points.O.toString()
+        }
     }
 }
