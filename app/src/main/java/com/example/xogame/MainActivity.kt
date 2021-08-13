@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.children
 import com.example.xogame.databinding.ActivityMainBinding
 import com.example.xogame.util.*
 
@@ -22,9 +23,9 @@ class MainActivity : AppCompatActivity() {
         init()
     }
 
-    private fun setValue(button: View) {
+    private fun setValue(button: Button) {
         Data.ROUND++
-        (button as Button).isEnabled = false
+        button.isEnabled = false
         button.text = if (Player.CURRENT == Player.TWO) Constant.X else Constant.O
 
         if (Player.CURRENT == Player.TWO) {
@@ -85,12 +86,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun init() {
-        for (i in 0 until Constant.CELL_COUNT) {
-            val button = binding.gridLayout.getChildAt(i) as Button
+        binding.gridLayout.children.forEach {
+            val button = it as Button
             buttons.add(button)
-            button.setOnClickListener { setValue(it) }
+            button.setOnClickListener { setValue(button = button) }
         }
-
         binding.btnReset.setOnClickListener {
             reset(null)
             Points.reset()

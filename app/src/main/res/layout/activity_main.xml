@@ -132,6 +132,7 @@
         app:cornerRadius="16dp"
         app:layout_constraintEnd_toEndOf="@id/grid_layout"
         app:layout_constraintStart_toStartOf="@id/grid_layout"
-        app:layout_constraintTop_toBottomOf="@id/grid_layout" />
+        app:layout_constraintTop_toBottomOf="@id/grid_layout"
+        tools:targetApi="p" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
